@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import UserService from '../service/UserService';   
+import UserService from '../../service/UserService';   
 
 import { Button } from '@/components/ui/button';
 import { NavLinks } from '@/components/common/nav-links';

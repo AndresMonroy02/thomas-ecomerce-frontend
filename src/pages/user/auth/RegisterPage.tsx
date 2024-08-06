@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import UserService from '../../../components/service/UserService';
+import UserService from '../../../service/UserService';
 import { useNavigate } from 'react-router-dom';
 
 interface FormData {
