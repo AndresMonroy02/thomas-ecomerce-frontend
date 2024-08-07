@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import UserService from '../../service/UserService';
+import UserService from '@/service/UserService';
 
 interface User {
     id?: number;

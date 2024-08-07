@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Product } from "../../types/interface/types";
+import { Product } from "@/types/categoria/types";
 
 export default function ProductCard({ title, description, price, imageSrc }: Product) {
     return (

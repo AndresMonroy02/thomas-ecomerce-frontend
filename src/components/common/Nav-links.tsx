@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button"; // Assuming your Button compone
 
 const links = [
     { name: "Productos", path: "/products" },
-    { name: "test", path: "/android" },
-    { name: "Web", path: "/web" },
 ];
 
 export const NavLinks = () => {

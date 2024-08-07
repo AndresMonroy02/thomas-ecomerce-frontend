@@ -3,12 +3,15 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/common/Navbar';
 import LoginPage from './pages/user/auth/LoginPage';
 import RegistrationPage from './pages/user/auth/RegisterPage';
+import CategoriesPage from './pages/category/CategoriesPage';
 // import FooterComponent from './components/common/Footer';
 import UserService from './service/UserService';
 import UpdateUser from './pages/user/UpdateUser';
 import UserManagementPage from './pages/user/UserManagementPage';
 import ProfilePage from './pages/user/ProfilePage';
 import ProductsPage from './pages/products/ProductsPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App: React.FC = () => {
   return (
@@ -25,6 +28,7 @@ const App: React.FC = () => {
               {/* Check if user is authenticated and admin before rendering admin-only routes */}
               {UserService.adminOnly() && (
                 <>
+                  <Route path="/category" element={<CategoriesPage />} />
                   <Route path="/register" element={<RegistrationPage />} />
                   <Route path="/admin/user-management" element={<UserManagementPage />} />
                   <Route path="/update-user/:userId" element={<UpdateUser />} />
@@ -35,6 +39,7 @@ const App: React.FC = () => {
           </div>
           {/* <FooterComponent /> */}
         </div>
+        <ToastContainer />
       </BrowserRouter>
   );
 }

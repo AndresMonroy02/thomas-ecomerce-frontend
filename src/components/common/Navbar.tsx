@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import UserService from '../../service/UserService';   
+import UserService from '@/service/UserService';   
 
 import { Button } from '@/components/ui/button';
-import { NavLinks } from '@/components/common/nav-links';
+import { NavLinks } from '@/components/common/Nav-links';
 
 const Navbar: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(UserService.isAuthenticated());
@@ -61,12 +61,20 @@ const Navbar: React.FC = () => {
                             {isAdmin && (
                                 <>
                                     <Link
-                                        to={`/${params.feature || ''}`}
+                                        to={`/user-manage`}
                                         className={'user-manage' === `${params.platform}`
                                             ? "text-primary" // Adjust class names for your styling
                                             : "text-muted-foreground hover:text-primary"}
                                     >
-                                        Manejar usuarios
+                                        Usuarios
+                                    </Link>
+                                    <Link
+                                        to={`/category`}
+                                        className={'category' === `${params.platform}`
+                                            ? "text-primary" // Adjust class names for your styling
+                                            : "text-muted-foreground hover:text-primary"}
+                                    >
+                                        Categorias
                                     </Link>
                                 </>
                             )}

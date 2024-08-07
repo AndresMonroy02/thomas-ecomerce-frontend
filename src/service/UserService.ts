@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { User } from '../types/interface/types';
+import { User } from '../types/user/types';
 const BASE_URL: string = import.meta.env.VITE_BASE_URL || "http://127.0.0.1:8090";
 
 interface LoginResponse {
@@ -119,6 +119,9 @@ class UserService {
     localStorage.removeItem('role');
   }
 
+  static getToken(): string | null {
+    return localStorage.getItem('token');
+  }
   static isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
     return !!token;
