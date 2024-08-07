@@ -1,16 +1,3 @@
-
-export interface Product {
-    title: string;
-    description: string;
-    price: string;
-    imageSrc: string;
-}
-
-export interface Category {
-    id?: number;
-    name: string;
-}
-
 export interface Pageable {
     offset: number;
     pageNumber: number;

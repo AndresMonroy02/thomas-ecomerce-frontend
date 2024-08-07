@@ -69,6 +69,14 @@ const Navbar: React.FC = () => {
                                         Usuarios
                                     </Link>
                                     <Link
+                                        to={`/admin/products`}
+                                        className={'admin-products' === `${params.platform}`
+                                            ? "text-primary" // Adjust class names for your styling
+                                            : "text-muted-foreground hover:text-primary"}
+                                    >
+                                        Productos
+                                    </Link>
+                                    <Link
                                         to={`/category`}
                                         className={'category' === `${params.platform}`
                                             ? "text-primary" // Adjust class names for your styling

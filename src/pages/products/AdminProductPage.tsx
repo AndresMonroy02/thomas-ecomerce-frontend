@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import CategoryService from '@/service/CategoryService';
-import { Category } from '@/types/category/types';
+import ProductService from '@/service/ProductService';
+import { Product } from '@/types/product/types';
 import { Page } from '@/types/types';
 import SearchButtonNav from '@/components/common/SearchButtonNav';
-import CategoryTable from '@/components/category/CategoryTable';
+import ProductTable from '@/components/product/ProductTable';
 import { toast } from 'react-toastify';
 import {
     AlertDialog,
@@ -13,11 +13,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ModalCreateCategory } from '@/components/category/ModalCreateCategory';
-import { sampleCategories } from '@/types/category/sampleCategories';
+import { sampleProducts } from '@/types/product/sampleProducts';
+import ModalCreateProduct from '@/components/product/ModalCreateProduct';
 
-const CategoriesPage: React.FC = () => {
-    const [categories, setCategories] = useState<Category[]>([]);
+const ProductsPage: React.FC = () => {
+    const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,27 +25,26 @@ const CategoriesPage: React.FC = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [categoryIdToDelete, setCategoryIdToDelete] = useState<number | null>(null);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // State for modal visibility
-    const [initialFetchEmpty, setInitialFetchEmpty] = useState<boolean | null>(null); // Flag for initial fetch
+    const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [initialFetchEmpty, setInitialFetchEmpty] = useState<boolean | null>(null);
 
     const fetchData = async (page: number, pageSize: number, query: string = '') => {
         setIsLoading(true);
         setError(null);
 
         try {
-            let fetchedCategories: Page<Category>;
+            let fetchedProducts: Page<Product>;
             if (query.trim() !== '') {
-                console.log(`Fetching categories with query: ${query}`);
-                fetchedCategories = await CategoryService.getCategoriesByNameContaining(query, page, pageSize);
+                fetchedProducts = await ProductService.getProductByNameContaining(query, page, pageSize);
             } else {
-                fetchedCategories = await CategoryService.getAllCategories(page, pageSize);
+                fetchedProducts = await ProductService.getAllProducts(page, pageSize);
             }
-            console.log('Fetched categories:', fetchedCategories);
-            setCategories(fetchedCategories.content);
-            setTotalItems(fetchedCategories.totalElements);
+            console.log('Fetched products:', fetchedProducts);
+            setProducts(fetchedProducts.content);
+            setTotalItems(fetchedProducts.totalElements);
             if (initialFetchEmpty === null) {
-                setInitialFetchEmpty(fetchedCategories.content.length === 0);
+                setInitialFetchEmpty(fetchedProducts.content.length === 0);
             }
         } catch (err) {
             setError(err as Error);
@@ -68,62 +67,51 @@ const CategoriesPage: React.FC = () => {
     };
 
     const handleSearch = (query: string) => {
-        console.log(`Searching for: ${query}`);
+        console.log('Searching for:', query);
         setSearchQuery(query);
         setCurrentPage(1);
     };
 
-    const handleEdit = async (categoryId: number) => {
-        const row = document.getElementById(`category-${categoryId}`);
-        if (!row) return;
-
-        const input = row.querySelector('input') as HTMLInputElement;
-        const saveButton = row.querySelector('.save') as HTMLButtonElement;
-
-        if (saveButton.textContent === 'Editar') {
-            if (input) input.disabled = false;
-            saveButton.textContent = 'Guardar';
-        } else if (saveButton.textContent === 'Guardar') {
-            if (input) {
-                const categoryName = input.value;
-                console.log(`Saving category with ID: ${categoryId} and name: ${categoryName}`);
-                input.disabled = true;
-                try {
-                    await CategoryService.updateCategory(categoryId, { name: categoryName });
-                    toast.success('Categoria actualizada correctamente');
-                    fetchData(currentPage, pageSize, searchQuery);
-                } catch (error) {
-                    console.error('Error updating category:', error);
-                    toast.error('Error al actualizar la categoria');
-                }
-                saveButton.textContent = 'Editar';
-            }
+    const handleEdit = async (productId: number, updatedProduct: Partial<Product>) => {
+        try {
+            const productToUpdate: Product = {
+                ...updatedProduct,
+                id: productId, // Provide a default value for the id property
+                name: updatedProduct.name || '', // Provide a default value for the name property
+                description: updatedProduct.description || '', // Provide a default value for the description property
+            };
+            await ProductService.updateProduct(productId, productToUpdate);
+            toast.success('Producto actualizado correctamente');
+            fetchData(currentPage, pageSize, searchQuery);
+        } catch (error) {
+            console.error('Error updating product:', error);
+            toast.error('Error al actualizar el producto');
         }
     };
 
-    const handleOpenDialog = (categoryId: number) => {
-        setCategoryIdToDelete(categoryId);
+    const handleOpenDialog = (productId: number) => {
+        setProductIdToDelete(productId);
         setIsDialogOpen(true);
     };
 
     const handleConfirmDelete = async () => {
-        if (categoryIdToDelete !== null) {
+        if (productIdToDelete !== null) {
             try {
-                await CategoryService.deleteCategory(categoryIdToDelete);
-                toast.success('Categoria eliminada correctamente');
+                await ProductService.deleteProduct(productIdToDelete);
+                toast.success('Producto eliminado correctamente');
                 fetchData(currentPage, pageSize, searchQuery);
             } catch (error) {
-                console.error('Error deleting category:', error);
-                toast.error('Error al eliminar la categoria');
+                console.error('Error deleting product:', error);
+                toast.error('Error al eliminar el producto');
             }
             setIsDialogOpen(false);
-            setCategoryIdToDelete(null);
+            setProductIdToDelete(null);
         }
     };
 
     const handleCancelDelete = () => {
         setIsDialogOpen(false);
-        setCategoryIdToDelete(null);
+        setProductIdToDelete(null);
     };
 
     const handleOpenCreateModal = () => {
@@ -134,35 +122,37 @@ const CategoriesPage: React.FC = () => {
         setIsCreateModalOpen(false);
     };
 
-    const handleCreateCategory = async (name: string) => {
+    const handleCreateProduct = async (product: Product) => {
         try {
-            await CategoryService.addCategory({ name });
-            toast.success('Categoria creada correctamente');
+            console.log('Creating product:', product);
+            await ProductService.addProduct(product);
+            toast.success('Producto creado correctamente');
             fetchData(currentPage, pageSize, searchQuery);
         } catch (error) {
-            console.error('Error creating category:', error);
-            toast.error('Error al crear la categoria');
+            console.error('Error creating product:', error);
+            toast.error('Error al crear el producto');
         }
         handleCloseCreateModal();
     };
+    
 
-    const handleBulkCreateCategories = async () => {
+    const handleBulkCreateProducts = async () => {
         try {
-            await Promise.all(sampleCategories.map((name: string) => CategoryService.addCategory({ name })));
-            toast.success('Categorías creadas correctamente');
+            await Promise.all(sampleProducts.map((product: Product) => ProductService.addProduct(product)));
+            toast.success('Productos creados correctamente');
             fetchData(currentPage, pageSize, searchQuery);
         } catch (error) {
-            console.error('Error creando categorías:', error);
-            toast.error('Error al crear las categorías');
+            console.error('Error creando productos:', error);
+            toast.error('Error al crear los productos');
         }
     };
 
     return (
         <div className="w-full flex items-center justify-center p-16">
             {isLoading ? (
-                <p>Cargando categorías...</p>
+                <p>Cargando productos...</p>
             ) : error ? (
-                <p>Error al obtener categorías: {error.message}</p>
+                <p>Error al obtener productos: {error.message}</p>
             ) : (
                 <div className='w-4/5'>
                     <div className="flex items-center justify-between mb-4">
@@ -171,25 +161,25 @@ const CategoriesPage: React.FC = () => {
                                 className="w-48 p-3 bg-lime-500 rounded-full hover:bg-lime-600"
                                 onClick={handleOpenCreateModal}
                             >
-                                Crear Categorías
+                                Crear Producto
                             </button>
                             {initialFetchEmpty && (
                                 <button
                                     className="w-48 p-3 bg-blue-500 rounded-full hover:bg-blue-600"
-                                    onClick={handleBulkCreateCategories}
+                                    onClick={handleBulkCreateProducts}
                                 >
-                                    Crear Categorías en lote
+                                    Crear Productos en lote
                                 </button>
                             )}
                         </div>
                         <SearchButtonNav
-                            placeholder="Buscar una categoría..."
-                            inputId="category-search"
+                            placeholder="Buscar un producto..."
+                            inputId="product-search"
                             onSearch={handleSearch}
                         />
                     </div>
-                    <CategoryTable
-                        categories={categories}
+                    <ProductTable
+                        products={products}
                         currentPage={currentPage}
                         pageSize={pageSize}
                         totalItems={totalItems}
@@ -205,7 +195,7 @@ const CategoriesPage: React.FC = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Confirmar Eliminación</AlertDialogTitle>
                         <AlertDialogDescription>
-                            ¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.
+                            ¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -225,13 +215,13 @@ const CategoriesPage: React.FC = () => {
                 </AlertDialogContent>
             </AlertDialog>
             {isCreateModalOpen && (
-                <ModalCreateCategory
+                <ModalCreateProduct
                     onClose={handleCloseCreateModal}
-                    onCreate={handleCreateCategory}
+                    onProductCreated={handleCreateProduct}  // Ensure this is correctly passed
                 />
             )}
         </div>
     );
 };
 
-export default CategoriesPage;
+export default ProductsPage;

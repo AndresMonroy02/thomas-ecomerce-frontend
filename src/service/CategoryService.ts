@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
-import { Category, Page } from '@/types/categoria/types'; // Import shared types
+import { Category } from '@/types/category/types'; // Import shared types
 import UserService from '@/service/UserService';
+import { Page } from '@/types/types';
 
 const BASE_URL: string = import.meta.env.VITE_BASE_URL || "http://127.0.0.1:8090";
 
@@ -30,22 +31,6 @@ class CategoryService {
         try {
             const response: AxiosResponse<Category> = await axios.get(
                 `${CategoryService.BASE_URL}/api/v1/categories/${id}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            return response.data;
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    // Get a category by name
-    static async getCategoryByName(name: string): Promise<Category> {
-        const token = UserService.getToken() ?? '';
-        try {
-            const response: AxiosResponse<Category> = await axios.get(
-                `${CategoryService.BASE_URL}/api/v1/categories/${name}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }

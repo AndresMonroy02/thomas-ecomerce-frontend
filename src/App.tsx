@@ -12,6 +12,7 @@ import ProfilePage from './pages/user/ProfilePage';
 import ProductsPage from './pages/products/ProductsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AdminProductsPage from './pages/products/AdminProductPage';
 
 const App: React.FC = () => {
   return (
@@ -29,6 +30,7 @@ const App: React.FC = () => {
               {UserService.adminOnly() && (
                 <>
                   <Route path="/category" element={<CategoriesPage />} />
+                  <Route path="/admin/products" element={<AdminProductsPage />} />
                   <Route path="/register" element={<RegistrationPage />} />
                   <Route path="/admin/user-management" element={<UserManagementPage />} />
                   <Route path="/update-user/:userId" element={<UpdateUser />} />
