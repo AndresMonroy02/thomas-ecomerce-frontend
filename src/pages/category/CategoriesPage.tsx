@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CategoryService from '@/service/CategoryService';
-import { Category, Page } from '@/types/categoria/types'; 
+import { Category, Page } from '@/types/categoria/types';
 import SearchButtonNav from '@/components/common/SearchButtonNav';
 import CategoryTable from '@/components/category/CategoryTable';
 import { toast } from 'react-toastify';
@@ -12,6 +12,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ModalCreateCategory } from '@/components/category/ModalCreateCategory'; // Import the modal component
 
 const CategoriesPage: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -20,9 +21,10 @@ const CategoriesPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
-    const [searchQuery, setSearchQuery] = useState(''); // State for search query
+    const [searchQuery, setSearchQuery] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [categoryIdToDelete, setCategoryIdToDelete] = useState<number | null>(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // State for modal visibility
 
     const fetchData = async (page: number, pageSize: number, query: string = '') => {
         setIsLoading(true);
@@ -68,10 +70,10 @@ const CategoriesPage: React.FC = () => {
     const handleEdit = async (categoryId: number) => {
         const row = document.getElementById(`category-${categoryId}`);
         if (!row) return;
-    
+
         const input = row.querySelector('input') as HTMLInputElement;
         const saveButton = row.querySelector('.save') as HTMLButtonElement;
-    
+
         if (saveButton.textContent === 'Editar') {
             if (input) input.disabled = false;
             saveButton.textContent = 'Guardar';
@@ -118,6 +120,26 @@ const CategoriesPage: React.FC = () => {
         setCategoryIdToDelete(null);
     };
 
+    const handleOpenCreateModal = () => {
+        setIsCreateModalOpen(true);
+    };
+
+    const handleCloseCreateModal = () => {
+        setIsCreateModalOpen(false);
+    };
+
+    const handleCreateCategory = async (name: string) => {
+        try {
+            await CategoryService.addCategory({ name });
+            toast.success('Categoria creada correctamente');
+            fetchData(currentPage, pageSize, searchQuery);
+        } catch (error) {
+            console.error('Error creating category:', error);
+            toast.error('Error al crear la categoria');
+        }
+        handleCloseCreateModal();
+    };
+
     return (
         <div className="w-full flex items-center justify-center p-16">
             {isLoading ? (
@@ -127,13 +149,16 @@ const CategoriesPage: React.FC = () => {
             ) : (
                 <div className='w-4/5'>
                     <div className="flex items-center justify-between mb-4">
-                        <button className="w-48 p-3 bg-lime-500 rounded-full hover:bg-lime-700">
+                        <button
+                            className="w-48 p-3 bg-lime-500 rounded-full hover:bg-lime-600"
+                            onClick={handleOpenCreateModal}
+                        >
                             Crear Categorias
                         </button>
                         <SearchButtonNav
                             placeholder="Buscar una categoria..."
                             inputId="category-search"
-                            onSearch={handleSearch} // Pass the handler
+                            onSearch={handleSearch}
                         />
                     </div>
                     <CategoryTable
@@ -172,6 +197,12 @@ const CategoriesPage: React.FC = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            {isCreateModalOpen && (
+                <ModalCreateCategory
+                    onClose={handleCloseCreateModal}
+                    onCreate={handleCreateCategory}
+                />
+            )}
         </div>
     );
 };

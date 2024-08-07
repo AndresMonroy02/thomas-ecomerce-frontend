@@ -93,7 +93,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                                                     handleSave(category.id);
                                                 }
                                             }}
-                                            className="save px-2 py-1 text-sm bg-green-500 text-white rounded-full hover:bg-green-700 transition-all duration-200"
+                                            className="save px-2 py-1 text-sm bg-lime-500 text-white rounded-full hover:bg-lime-600 transition-all duration-200"
                                         >
                                             Guardar
                                         </button>
@@ -145,14 +145,14 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                                 <button
                                     onClick={() => onPageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="px-2 py-1 text-sm bg-lime-500 text-white rounded-full hover:bg-lime-700 transition-all duration-200"
+                                    className="px-2 py-1 text-sm bg-lime-500 text-white rounded-full hover:bg-lime-600 transition-all duration-200"
                                 >
                                     Anterior
                                 </button>
                                 <button
                                     onClick={() => onPageChange(currentPage + 1)}
                                     disabled={currentPage * pageSize >= totalItems}
-                                    className="px-2 py-1 text-sm bg-lime-500 text-white rounded-full hover:bg-lime-700 transition-all duration-200"
+                                    className="px-2 py-1 text-sm bg-lime-500 text-white rounded-full hover:bg-lime-600 transition-all duration-200"
                                 >
                                     Siguiente
                                 </button>

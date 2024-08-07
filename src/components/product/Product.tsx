@@ -21,7 +21,7 @@ export default function ProductCard({ title, description, price, imageSrc }: Pro
                 <div className="flex items-center justify-between">
                     <span className="text-lg mt-1 pr-3 font-bold">{price}</span>
                     <Button 
-                        className="w-full mt-1 bg-lime-500 rounded-full hover:bg-lime-700"
+                        className="w-full mt-1 bg-lime-500 rounded-full hover:bg-lime-600"
                     >Añadi al carrito</Button>
                 </div>
             </CardContent>

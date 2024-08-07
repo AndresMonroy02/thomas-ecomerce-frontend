@@ -72,7 +72,7 @@ const LoginPage: React.FC = () => {
                         />
                         <Button
                             type="submit"
-                            className="w-full mt-6 bg-lime-500 rounded-full hover:bg-lime-700"
+                            className="w-full mt-6 bg-lime-500 rounded-full hover:bg-lime-600"
                         >
                             Login
                         </Button>
