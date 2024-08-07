@@ -116,7 +116,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ onFilterChange }) => {
                         </ul>
                     )}
                 </div>
-                <div className="flex flex-col w-full md:w-1/4">
+                <div className="flex flex-col w-full md:w-1/4 mt-4">
                     <button
                         onClick={handleFilterChange}
                         className="bg-lime-500 text-white py-2 px-4 rounded hover:bg-lime-600 text-sm"

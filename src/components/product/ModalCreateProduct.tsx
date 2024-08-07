@@ -1,30 +1,47 @@
 import React, { useState, useEffect } from 'react';
+import { Product } from '@/types/product/types';
 import { Category } from '@/types/category/types';
+import { toast } from 'react-toastify';
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import CategoryService from '@/service/CategoryService';
-import { Badge } from '@/components/ui/badge';
 
-interface ProductFilterProps {
-    onFilterChange: (filters: { minPrice?: number; maxPrice?: number; categories?: string; name?: string; description?: string }) => void;
+interface ModalCreateProductProps {
+    onClose: () => void;
+    onProductCreated: (product: Product) => void; // Callback to handle the created product
 }
 
-const ProductFilter: React.FC<ProductFilterProps> = ({ onFilterChange }) => {
-    const [minPrice, setMinPrice] = useState<number | undefined>();
-    const [maxPrice, setMaxPrice] = useState<number | undefined>();
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+const initialProduct: Omit<Product, 'id'> = {
+    name: '',
+    description: '',
+    price: 0,
+    img: null,
+    state: true,
+    categories: [],
+};
+
+const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ onClose, onProductCreated }) => {
+    const [product, setProduct] = useState<Omit<Product, 'id'>>(initialProduct);
     const [query, setQuery] = useState('');
-    const [categories, setCategories] = useState<Category[]>([]);
     const [fetchedCategories, setFetchedCategories] = useState<Category[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             if (query.trim() !== '') {
                 try {
+                    console.log(`Fetching categories with query: ${query}`);
                     const response = await CategoryService.getCategoriesByNameContaining(query);
                     setFetchedCategories(response.content); // Adjust based on your API response structure
                 } catch (error) {
                     console.error('Error fetching categories:', error);
+                    toast.error('Error fetching categories');
                 }
             } else {
                 setFetchedCategories([]);
@@ -33,92 +50,119 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ onFilterChange }) => {
         fetchCategories();
     }, [query]);
 
-    useEffect(() => {
-        const fetchAllCategories = async () => {
-            try {
-                const response = await CategoryService.getAllCategories();
-                setCategories(response.content); // Adjust based on your API response structure
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-            }
-        };
-        fetchAllCategories();
-    }, []);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setProduct(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setProduct(prev => ({ ...prev, [name]: checked }));
+    };
 
     const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value);
     };
 
     const handleCategorySelect = (category: Category) => {
-        if (!selectedCategories.includes(category.name || '')) {
-            setSelectedCategories([...selectedCategories, category.name || '']);
-        }
-    };
-
-    const handleCategoryRemove = (categoryName: string) => {
-        setSelectedCategories(selectedCategories.filter(name => name !== categoryName));
-    };
-
-    const handleFilterChange = () => {
-        onFilterChange({
-            minPrice,
-            maxPrice,
-            categories: selectedCategories.join(','), // Convert array to comma-separated string
-            name,
-            description,
+        setSelectedCategories(prev => {
+            if (!prev.some(c => c.id === category.id)) {
+                return [...prev, category];
+            }
+            return prev;
         });
     };
 
+    const handleCategoryRemove = (categoryId: number) => {
+        setSelectedCategories(prev => prev.filter(c => c.id !== categoryId));
+    };
+
+    const handleSubmit = () => {
+        // Validate fields
+        if (product.name && product.description && product.price > 0) {
+            // Format product data to match the expected structure
+            const productToCreate = {
+                name: product.name,
+                description: product.description,
+                price: parseFloat(String(product.price)), 
+                img: product.img || null,
+                state: product.state,
+                categories: selectedCategories.map(category => ({
+                    id: category.id,
+                    name: category.name
+                })),
+                id: 0, // Provide a default value for the id property
+            };
+    
+            console.log('Product to be created:', productToCreate);
+            onProductCreated(productToCreate);
+            onClose();
+        } else {
+            toast.error('Todos los campos son obligatorios y el precio debe ser mayor a 0');
+        }
+    };
+    
+
     return (
-        <div className="w-full flex flex-col gap-2 mb-4">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                <div className="flex flex-col w-full md:w-1/4">
-                    <label className="mb-2 text-sm font-medium">Precio Mínimo</label>
-                    <input
-                        type="number"
-                        placeholder="Min Price"
-                        value={minPrice ?? ''}
-                        onChange={(e) => setMinPrice(parseFloat(e.target.value))}
-                        className="p-1 border rounded mb-2 text-sm"
-                    />
-                    <label className="mb-2 text-sm font-medium">Precio Máximo</label>
-                    <input
-                        type="number"
-                        placeholder="Max Price"
-                        value={maxPrice ?? ''}
-                        onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
-                        className="p-1 border rounded mb-2 text-sm"
-                    />
-                </div>
-                <div className="flex flex-col w-full md:w-1/4">
-                    <label className="mb-2 text-sm font-medium">Nombre</label>
+        <AlertDialog open onOpenChange={onClose}>
+            <AlertDialogContent className="max-w-4xl max-h-screen overflow-auto p-6">
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Crear Producto</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Llena la información del nuevo producto.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="space-y-4">
                     <input
                         type="text"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="p-1 border rounded mb-2 text-sm"
+                        name="name"
+                        placeholder="Nombre"
+                        value={product.name}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded"
                     />
-                    <label className="mb-2 text-sm font-medium">Descripción</label>
+                    <textarea
+                        name="description"
+                        placeholder="Descripción"
+                        value={product.description}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded"
+                    />
+                    <input
+                        type="number"
+                        name="price"
+                        placeholder="Precio"
+                        value={product.price}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded"
+                    />
                     <input
                         type="text"
-                        placeholder="Description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="p-1 border rounded mb-2 text-sm"
+                        name="img"
+                        placeholder="Imagen (URL)"
+                        value={product.img || ''}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded"
                     />
-                </div>
-                <div className="flex flex-col w-full md:w-1/4">
-                    <label className="mb-2 text-sm font-medium">Buscar Categorías</label>
+                    <label className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            name="state"
+                            checked={product.state}
+                            onChange={handleCheckboxChange}
+                            className="form-checkbox"
+                        />
+                        <span>Activo</span>
+                    </label>
                     <input
                         type="text"
                         placeholder="Buscar categorías"
                         value={query}
                         onChange={handleQueryChange}
-                        className="w-full p-1 border rounded mb-2 text-sm"
+                        className="w-full p-2 border rounded"
                     />
                     {fetchedCategories.length > 0 && (
-                        <ul className="max-h-40 overflow-auto border rounded mb-2 text-sm">
+                        <ul className="max-h-40 overflow-auto border rounded">
                             {fetchedCategories.map(category => (
                                 <li
                                     key={category.id}
@@ -130,36 +174,37 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ onFilterChange }) => {
                             ))}
                         </ul>
                     )}
-                </div>
-                <div className="flex flex-col w-full md:w-1/4">
-                    <button
-                        onClick={handleFilterChange}
-                        className="bg-lime-500 text-white py-2 px-4 rounded hover:bg-lime-600 text-sm"
-                    >
-                        Filtrar
-                    </button>
-                </div>
-            </div>
-
-            {selectedCategories.length > 0 && (
-                <div className="w-full mt-2 mb-3">
-                    <div className="flex flex-wrap gap-2">
-                        {selectedCategories.map((category, index) => (
-                            <Badge key={index} variant="outline" className="text-sm">
-                                {category}
+                    <div className="space-y-2">
+                        {selectedCategories.map(category => (
+                            <div key={category.id} className="flex items-center justify-between p-2 bg-gray-200 rounded">
+                                <span>{category.name}</span>
                                 <button
-                                    onClick={() => handleCategoryRemove(category)}
-                                    className="ml-2 text-red-500 hover:text-red-700"
+                                    onClick={() => handleCategoryRemove(category.id as number)}
+                                    className="px-2 py-1 text-sm font-medium text-white bg-red-500 rounded-full hover:bg-red-700 transition-all duration-200"
                                 >
                                     X
                                 </button>
-                            </Badge>
+                            </div>
                         ))}
                     </div>
                 </div>
-            )}
-        </div>
+                <AlertDialogFooter>
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 text-sm font-medium bg-gray-500 text-white rounded-full hover:bg-gray-700 transition-all duration-200"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        className="px-4 py-2 text-sm font-medium bg-lime-500 text-white rounded-full hover:bg-lime-600 transition-all duration-200"
+                    >
+                        Crear
+                    </button>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 };
 
-export default ProductFilter;
+export default ModalCreateProduct;
