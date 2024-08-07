@@ -1218,6 +1218,5 @@ return products.map(product => ({
     img: null, // Set the img property to null
 }));
 }
-
 // Sample usage with sampleProducts
 export const sampleProducts = transformProducts(ListsampleProducts);

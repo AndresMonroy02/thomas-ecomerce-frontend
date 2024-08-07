@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
                 <div className="shrink-0 items-end pr-10">
                     <div className="flex flex-row items-center justify-end gap-3">
                         <div className="hidden lg:flex flex-row items-center gap-3">
-                            {isAuthenticated && (
+                            {/* {isAuthenticated && (
                                 <Link
                                     to={`/${params.feature || ''}`}
                                     className={'profile' === `${params.platform}`
@@ -57,11 +57,19 @@ const Navbar: React.FC = () => {
                                 >
                                     Perfil
                                 </Link>
-                            )}
+                            )} */}
                             {isAdmin && (
                                 <>
                                     <Link
-                                        to={`/user-manage`}
+                                        to={`/admin/order`}
+                                        className={'admin-user' === `${params.platform}`
+                                            ? "text-primary" // Adjust class names for your styling
+                                            : "text-muted-foreground hover:text-primary"}
+                                    >
+                                        Ordenes
+                                    </Link>
+                                    <Link
+                                        to={`/admin/user-management`}
                                         className={'user-manage' === `${params.platform}`
                                             ? "text-primary" // Adjust class names for your styling
                                             : "text-muted-foreground hover:text-primary"}

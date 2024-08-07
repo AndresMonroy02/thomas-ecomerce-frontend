@@ -13,6 +13,8 @@ import ProductsPage from './pages/products/ProductsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminProductsPage from './pages/products/AdminProductPage';
+import AdminOrder from './pages/orders/AdminOrder';
+import ReportOrder from './pages/orders/ReportOrder';
 
 const App: React.FC = () => {
   return (
@@ -32,6 +34,9 @@ const App: React.FC = () => {
                   <Route path="/category" element={<CategoriesPage />} />
                   <Route path="/admin/products" element={<AdminProductsPage />} />
                   <Route path="/register" element={<RegistrationPage />} />
+                  <Route path="/admin/order" element={<AdminOrder />} />
+                  <Route path="/report-orders" element={<ReportOrder />} />
+                  
                   <Route path="/admin/user-management" element={<UserManagementPage />} />
                   <Route path="/update-user/:userId" element={<UpdateUser />} />
                 </>
